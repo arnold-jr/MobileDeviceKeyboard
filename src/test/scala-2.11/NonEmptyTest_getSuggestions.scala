@@ -5,12 +5,12 @@ import Suggester._
   */
 class NonEmptyTest_getSuggestions extends FunSuite {
 
-  test("testRemnant") {
-    val farm = createTree("Cat cow 1234;_cattle dog dart.")
+  test("testGetSuggestions") {
+    val farm = createTree("Cat cow cow 1234;_cattle catheter dog dog dog duck.")
 
-    assert( (farm getSuggestions "ca") === List("cattle"), "cattle")
-    assert( (farm getSuggestions "c").sorted === List("cattle","cow"), "cattle, cow")
-    assert( (farm getSuggestions "d").sorted === List("dart","dog"), "dart, dog")
+    assert( (farm getSuggestions "ca") === List(new Hint("cat",1), new Hint("catheter", 1), new Hint("cattle",1)), "1")
+    assert( (farm getSuggestions "d") === List(new Hint("dog",3), new Hint("duck", 1)), "1")
+    assert( (farm getSuggestions "") ===  (farm.parse sortBy(h => (- h.confidence, h.word))), "1")
   }
 
 }

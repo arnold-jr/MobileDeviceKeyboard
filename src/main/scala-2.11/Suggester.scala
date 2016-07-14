@@ -7,7 +7,7 @@ object Suggester {
 
   //type Hint = (String, Int)
   case class Hint(val word: String, val confidence: Int) {
-    override def toString = word + "(" + confidence + ")"
+    override def toString = word + " (" + confidence + ")"
   }
 
   /**
@@ -77,10 +77,10 @@ object Suggester {
     * A Tree containing data, children, and siblings
     *
     * @constructor creates a new Tree with character, weight, left child, and right sibling
-    * @param char the character at this point at the tree
+    * @param char   the character at this point at the tree
     * @param weight the number of times a valid word terminates at this node
-    * @param left Tree of the left children of this Tree
-    * @param right Tree of the right neigbhors of this Tree
+    * @param left   Tree of the left children of this Tree
+    * @param right  Tree of the right neigbhors of this Tree
     */
   case class NonEmpty(char: Char, weight: Int, left: Tree, right: Tree) extends Tree {
     override def toString = "{" + left + char + "(" + weight + ")" + right + "}"
@@ -89,7 +89,7 @@ object Suggester {
       case List() => this
       case x :: Nil =>
         if (x == char)
-          new NonEmpty(char, weight, left, right)
+          new NonEmpty(char, weight + 1, left, right)
         else
           new NonEmpty(char, weight, left, right merge chars)
       case x :: xs =>
@@ -99,11 +99,21 @@ object Suggester {
           new NonEmpty(char, weight, left, right merge chars)
     }
 
-    def parse: List[Hint] = {
+/*    def parse: List[Hint] = {
       def parseAcc(subtree: Tree, root: List[Char]): List[Hint] = subtree match {
-        case Empty => List(new Hint(root.mkString,3))
+        case Empty => List(new Hint(root.mkString, 3))
         case NonEmpty(c, w, l, Empty) => parseAcc(l, root ::: List(c))
         case NonEmpty(c, w, l, r) => parseAcc(l, root ::: List(c)) ++ parseAcc(r, root)
+      }
+      parseAcc(this, List())
+    }*/
+
+    def parse: List[Hint] = {
+      def parseAcc(subtree: Tree, root: List[Char]): List[Hint] = subtree match {
+        case Empty => Nil
+        case NonEmpty(c, 0, l, r) => parseAcc(l, root ::: List(c)) ++ parseAcc(r, root)
+        case NonEmpty(c, w, l, r) => List(new Hint((root ::: List(c)).mkString,w)) ++
+          parseAcc(l, root ::: List(c)) ++ parseAcc(r, root)
       }
       parseAcc(this, List())
     }
@@ -157,7 +167,8 @@ object Suggester {
           case x :: xs1 => if (c == x) loop(l, xs1) else loop(r, xs)
         }
       }
-      loop(this, word.toList) map({case Hint(w, c) => new Hint(word + w, c)})
+      //TODO: Look into sorting on the fly with heap sort
+      loop(this, word.toList) map {case Hint(w, c) => new Hint(word + w, c)} sortBy(h => (- h.confidence, h.word))
     }
   }
 
@@ -177,10 +188,5 @@ object Suggester {
   }
 
   def expand(word: String): List[String] = (for (i <- 1 to word.length) yield word take i) toList
-
-  def main(args: Array[String]) = {
-    println("Hello")
-
-  }
 
 }
