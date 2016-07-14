@@ -5,7 +5,10 @@
   */
 object Suggester {
 
-  type Hint = (String, Int)
+  //type Hint = (String, Int)
+  case class Hint(val word: String, val confidence: Int) {
+    override def toString = word + "(" + confidence + ")"
+  }
 
   /**
     * Abstract class type representing a Left Child - Right Sibling (LCRS) binary tree
@@ -30,7 +33,7 @@ object Suggester {
       *
       * @return the List of Strings representing valid sub-words
       */
-    def parse: List[String]
+    def parse: List[Hint]
 
     /**
       * Tests whether this Tree contains a String, starting from the root.
@@ -46,7 +49,7 @@ object Suggester {
       * @param word the String to be queried
       * @return the resultant Tree, a subset of this Tree
       */
-    def getSuggestions(word: String): List[String]
+    def getSuggestions(word: String): List[Hint]
 
   }
 
@@ -63,11 +66,11 @@ object Suggester {
       case x :: xs => new NonEmpty(x, 0, Empty merge xs, Empty)
     }
 
-    def parse: List[String] = List()
+    def parse: List[Hint] = List()
 
     def contains(word: String): Boolean = false
 
-    def getSuggestions(word: String): List[String] = List()
+    def getSuggestions(word: String): List[Hint] = List()
   }
 
   /**
@@ -96,9 +99,9 @@ object Suggester {
           new NonEmpty(char, weight, left, right merge chars)
     }
 
-    def parse: List[String] = {
-      def parseAcc(subtree: Tree, root: List[Char]): List[String] = subtree match {
-        case Empty => List(root.mkString)
+    def parse: List[Hint] = {
+      def parseAcc(subtree: Tree, root: List[Char]): List[Hint] = subtree match {
+        case Empty => List(new Hint(root.mkString,3))
         case NonEmpty(c, w, l, Empty) => parseAcc(l, root ::: List(c))
         case NonEmpty(c, w, l, r) => parseAcc(l, root ::: List(c)) ++ parseAcc(r, root)
       }
@@ -136,8 +139,8 @@ object Suggester {
     }
 
 
-    def getSuggestions(word: String): List[String] = {
-      def loop(subtree: Tree, xs: List[Char]): List[String] = subtree match {
+    def getSuggestions(word: String): List[Hint] = {
+      def loop(subtree: Tree, xs: List[Char]): List[Hint] = subtree match {
         case NonEmpty(c, _, Empty, Empty) => xs match {
           case List() => subtree parse
           case x :: Nil => List()
@@ -154,7 +157,7 @@ object Suggester {
           case x :: xs1 => if (c == x) loop(l, xs1) else loop(r, xs)
         }
       }
-      loop(this, word.toList) map(word + _)
+      loop(this, word.toList) map({case Hint(w, c) => new Hint(word + w, c)})
     }
   }
 
