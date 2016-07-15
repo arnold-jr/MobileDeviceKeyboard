@@ -24,9 +24,11 @@ object Interface {
     * @param args none
     */
   def main(args: Array[String]) {
-    val trainingWords = readLine("Enter the training words\n")
+    //val trainingWords = readLine("Enter the training words\n")
+    val trainingWords = "cow cat dog duck"
     val completer = new iAutoCompleteProvider(trainingWords)
-    val stem = readLine("Enter text\n")
-    println(completer.getWords(stem))
+    //val prefix = readLine("Enter text\n")
+    val prefix = "c"
+    println(completer.getWords(prefix))
   }
 }
