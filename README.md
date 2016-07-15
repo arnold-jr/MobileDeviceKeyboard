@@ -16,9 +16,8 @@ Once compiled, to execute type:
 ```bash
 > run
 ```
-
-The user is then prompted to input a training sentence, and subsequently, a prefix to query.
-
+The training data are provided in the file ```src/resources/trainingWords.txt```. The test data
+are specified in the file ```src/resources/testWords.txt```.
 
 ## Theory
 
