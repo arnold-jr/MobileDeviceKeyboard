@@ -1,4 +1,5 @@
 import Suggester._
+
 import scala.io.StdIn.readLine
 /**
   * Created by joshuaarnold on 7/14/16.
