@@ -1,6 +1,7 @@
 import Suggester._
+import scala.io.Source
 
-import scala.io.StdIn.readLine
+
 /**
   * Created by joshuaarnold on 7/14/16.
   */
@@ -16,7 +17,7 @@ object Interface {
     def getWords(root: String) = trainedTree getSuggestions root
   }
 
-  //TODO: modify to accept stdin or file names of training sets. Keep the text input alive.
+  //TODO: modify to accept file names of training and test words. Keep the text input alive.
   /**
     * Provides user interface via the command line.
     *
@@ -24,11 +25,20 @@ object Interface {
     * @param args none
     */
   def main(args: Array[String]) {
-    //val trainingWords = readLine("Enter the training words\n")
-    val trainingWords = "cow cat dog duck"
+    val trainingFileName = "trainingWords.txt"
+    val testFileName = "testWords.txt"
+
+    lazy val trainingWords =
+      Source.fromURL(getClass.getResource(trainingFileName)).getLines.toList.map(_ ++ " ").mkString
+
     val completer = new iAutoCompleteProvider(trainingWords)
-    //val prefix = readLine("Enter text\n")
-    val prefix = "c"
-    println(completer.getWords(prefix))
+
+    lazy val testWords =
+      Source.fromURL(getClass.getResource(testFileName)).getLines.toList.map(_ ++ " ").mkString
+
+    for (prefix <- testWords.split(" ")) {
+      print(prefix + " -> ")
+      println(completer.getWords(prefix))
+    }
   }
 }
