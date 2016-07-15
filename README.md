@@ -1,16 +1,26 @@
 # MobileDeviceKeyboard
 This repository provides a scala interface for suggesting words based on an input prefix.
 
+## Usage
+
 Building this project requires sbt which can be downloaded
 [here](http://www.scala-sbt.org/0.13/docs/Setup.html).
 
-To build, from the project directory execute
+To build, from the top-level (project) directory execute
 ```bash
 $ sbt
 > compile
 ```
 
+Once compiled, to execute type:
+```bash
+> run
+```
 
+The user is then prompted to input a training sentence, and subsequently, a prefix to query.
+
+
+## Theory
 
 The application uses an input stream of words to build a vocabulary. Using this vocabulary, the
 application suggests a word completion based on any given input String. One naive approach to
@@ -32,5 +42,9 @@ t    w    g         g
 ```
 Using the LCRS structure, redundant prefixes are eliminated; the valid words of a prefix are the words
 formed by the prefix itself and its children (i.e. left neighbor).
+
+All operations are performed using immutable objects.
+
+
 
 

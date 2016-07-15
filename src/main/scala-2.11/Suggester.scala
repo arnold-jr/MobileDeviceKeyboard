@@ -2,16 +2,23 @@
 
 /**
   * Created by joshuaarnold on 7/13/16.
+  *
+  * Contains the essential functionality for building a Left Child Right Sibling binary tree
   */
 object Suggester {
 
-  //type Hint = (String, Int)
-  case class Hint(val word: String, val confidence: Int) {
+  /**
+    * The fundamental class of a possible word completion and its confidence value.
+    *
+    * @param word the suggested word
+    * @param confidence the number of times that word appeared in the training set
+    */
+  case class Hint(word: String, confidence: Int) {
     override def toString = word + " (" + confidence + ")"
   }
 
   /**
-    * Abstract class type representing a Left Child - Right Sibling (LCRS) binary tree
+    * Abstract base class type representing a LCRS binary tree
     */
   abstract class Tree {
     /**
@@ -36,7 +43,8 @@ object Suggester {
     def parse: List[Hint]
 
     /**
-      * Tests whether this Tree contains a String, starting from the root.
+      * Tests whether this Tree contains a String, starting from the root. Implemented and tested,
+      * but not utilized.
       *
       * @param word the String to be queried
       * @return true if the (sub) word exists in the string
@@ -44,7 +52,7 @@ object Suggester {
     def contains(word: String): Boolean
 
     /**
-      * Returns the subtree remaining after "word" is removed, starting from the root.
+      * Gets all valid suggestions based on the training vocabulary.
       *
       * @param word the String to be queried
       * @return the resultant Tree, a subset of this Tree
@@ -60,6 +68,18 @@ object Suggester {
     override def toString = "."
 
 
+    /**
+      * Merges new word (List[Char]) into an Empty Tree.
+      *
+      * Creates a child (left neighbor) for each character and assigns a confidence (weight) of 1
+      * to the last character, signifying the end of valid word. It is necessary to mark the
+      * end of valid words because valid words do not necessarily terminate at leaves. For instance,
+      * the word "cat" maps onto the word "cattle" and terminates at a non-leaf element (i.e. "t"
+      * has a NonEmpty left neighbor).
+      *
+      * @param chars the list of characters to be merged
+      * @return the resultant treee
+      */
     def merge(chars: List[Char]): Tree = chars match {
       case List() => this
       case x :: Nil => new NonEmpty(x, 1, Empty, Empty)
@@ -85,6 +105,16 @@ object Suggester {
   case class NonEmpty(char: Char, weight: Int, left: Tree, right: Tree) extends Tree {
     override def toString = "{" + left + char + "(" + weight + ")" + right + "}"
 
+    /**
+      * Merges new word (List[Char]) into the existing NonEmpty Tree.
+      *
+      * Recurses through both the word and this Tree, checking if "char" of This tree matches
+      * the head of the "chars" list. If so, both are 'popped' and the rest of the tree is traversed.
+      * If not, siblings (right neighbors) are searched for matches.
+      *
+      * @param chars the list of characters to be merged
+      * @return the resultant treee
+      */
     def merge(chars: List[Char]): Tree = chars match {
       case List() => this
       case x :: Nil =>
@@ -99,15 +129,14 @@ object Suggester {
           new NonEmpty(char, weight, left, right merge chars)
     }
 
-/*    def parse: List[Hint] = {
-      def parseAcc(subtree: Tree, root: List[Char]): List[Hint] = subtree match {
-        case Empty => List(new Hint(root.mkString, 3))
-        case NonEmpty(c, w, l, Empty) => parseAcc(l, root ::: List(c))
-        case NonEmpty(c, w, l, r) => parseAcc(l, root ::: List(c)) ++ parseAcc(r, root)
-      }
-      parseAcc(this, List())
-    }*/
-
+    /**
+      * Traverses a tree returning valid words (or suffixes) within a tree.
+      *
+      * When the recursion encounters a non-zero weight (confidence), that corresponding
+      * hint is constructed and added to the output List.
+      *
+      * @return the List of Hints representing valid sub-words (i.e. without root)
+      */
     def parse: List[Hint] = {
       def parseAcc(subtree: Tree, root: List[Char]): List[Hint] = subtree match {
         case Empty => Nil
@@ -119,6 +148,8 @@ object Suggester {
     }
 
     /**
+      *
+      *
       * Here, the Tree is traversed concurrently with "word". If the root of the Tree
       * matches the head of the string, both are 'popped' and the search continues. If the root
       * of the Tree does not match the head, the word is compared to the right 'sibling' Tree.
@@ -149,6 +180,17 @@ object Suggester {
     }
 
 
+    /**
+      * Gets all valid suggestions based on the training vocabulary.
+      *
+      * The query string and the Tree are both traversed recursively; if the entire query String
+      * is found within the tree, then all valid suffixes are found by calling parse on the children
+      * of the subtree. In the final steps, the list of suffixes (as Hints) are prepended with the
+      * query String, then sorted descending by confidence then by lexicographical ascension.
+      *
+      * @param word the String to be queried
+      * @return the resultant Tree, a subset of this Tree
+      */
     def getSuggestions(word: String): List[Hint] = {
       def loop(subtree: Tree, xs: List[Char]): List[Hint] = subtree match {
         case NonEmpty(c, _, Empty, Empty) => xs match {
@@ -186,7 +228,5 @@ object Suggester {
     val acc: Tree = Empty
     ((sentence.toLowerCase().replaceAll("[^a-z]", " ") split " ") foldLeft acc) (_ merge _.toList)
   }
-
-  def expand(word: String): List[String] = (for (i <- 1 to word.length) yield word take i) toList
 
 }

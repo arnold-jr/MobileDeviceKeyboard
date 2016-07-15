@@ -16,6 +16,13 @@ object Interface {
     def getWords(root: String) = trainedTree getSuggestions root
   }
 
+  //TODO: modify to accept stdin or file names of training sets. Keep the text input alive.
+  /**
+    * Provides user interface via the command line.
+    *
+    *
+    * @param args none
+    */
   def main(args: Array[String]) {
     val trainingWords = readLine("Enter the training words\n")
     val completer = new iAutoCompleteProvider(trainingWords)

@@ -5,6 +5,7 @@ val sentence = "The third thing that I need to tell you is that this thing does 
 val farm = createTree("Cat9834cat cat dog cow 1234;_cattle dog . dart adart")
 farm parse
 
+def expand(word: String): List[String] = (for (i <- 1 to word.length) yield word take i) toList
 
 val q = expand("darts")
 q map (farm contains _)
