@@ -4,11 +4,13 @@ This repository provides a scala interface for suggesting words based on an inpu
 Building this project requires sbt which can be downloaded
 [here](http://www.scala-sbt.org/0.13/docs/Setup.html).
 
+To build, from the project directory execute
 ```bash
 $ sbt
 > compile
-
 ```
+
+
 
 The application uses an input stream of words to build a vocabulary. Using this vocabulary, the
 application suggests a word completion based on any given input String. One naive approach to
